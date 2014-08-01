@@ -20,9 +20,9 @@
   (cond
    ((= player 0) '| |)
    ((= player 1) '!)
-   ((= player 2) '@)
-   ((= player 3) '$)
-   ((= player 4) '%)
+   ((= player 2) '$)
+   ((= player 3) '%)
+   ((= player 4) '&)
    (else p)))
 (define (floor-symb floor)
   (cond
@@ -227,7 +227,7 @@
        
 (define (game-repl time player board)
   ;; (print (game-eval (game-read time player board))))
-  (format #t "Player~d >>~%" player)
+  (format #t "Player~d(~S) >>~%" player (player-symb player))
   (let*
       ((cmd (game-read))
        (new-board (game-eval cmd time player board)))
@@ -255,7 +255,9 @@
   (let
       ((new-board (vector-copy board)))
     (do-ec (: player initiative)
-           (set! new-board (game-repl time player new-board)))
+           (begin
+             (set! new-board (game-repl time player new-board))
+             (draw-board board)))
     (let*
         ((resolved-board (game-resolve time initiative new-board))
          (resolved-initiative (players-resolve initiative resolved-board))
