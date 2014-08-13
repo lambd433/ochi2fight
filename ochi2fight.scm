@@ -29,7 +29,7 @@
    ((= floor *non-timed-floor*) '+)
 ;   ((= floor *timed-floor*) '-)
    (else floor)))
-  
+ 
 (define (inc n) (+ n 1))
 (define (dec n) (- n 1))
 (define (nxy n)
@@ -182,15 +182,14 @@
           (let
               ((floor (vector-ref (vector-ref board n) 0)))
             (and (<= *timed-floor* floor) (< floor 0)))))
-       (already-op?
+       (already-set?
         (lambda (n)
           (let
               ((floor (vector-ref (vector-ref board n) 0)))
-            (and (<= floor *non-timed-floor*) (< 0 floor)))))
+            (and (< floor *non-timed-floor*) (< 0 floor)))))
        (new-board (vector-copy board))
-
        (target-pos
-        (filter (lambda (p) (or (already-fallen? p) (already-op? p)))
+        (filter (lambda (p) (not (or (already-fallen? p) (already-set? p))))
            cell-pos)))
     (do-ec
      (: pos target-pos)
@@ -198,9 +197,6 @@
     new-board))
 
 (define (game-eval sexp time player board)
-  ;; (if (valid-command? sexp)
-  ;;     (eval sexp (interaction-environment))
-  ;;     (print "Invalid Command")))
   (let
       ((p (car sexp))
        (args (cdr sexp))
@@ -209,6 +205,9 @@
           (cond
            ((< (length args) 2) #f)
            (and (member (car args) *allowed-directions*) (member (cadr args) *allowed-fall-time*))))))
+  ;; (if (valid-command? sexp)
+  ;;     (eval sexp (interaction-environment))
+  ;;     (print "Invalid Command")))
     (cond
      ((or (eq? p 'w) (eq? p 'a) (eq? p 's) (eq? p 'd))
       (apply move (list p player board)))
@@ -337,4 +336,20 @@
        button-name 
        :text '(0 0) :command (lambda () (++ var-name))
        :textvariable var-name) :row row :column column)))) 
-(run)
+
+; -r -n player_num -p port -s ip
+(define (main args)
+  (let 
+      ((len (length args))
+      (warning 
+        (lambda ()
+          (format #t "Usage: ./~s " *program-name*))))
+    (cond
+     ((= len 1) (run))
+     (else (warning)))
+  0))
+
+;(define *port* 10007)
+;(define *server-ip* "127.0.0.1")
+;(define (client-establish)
+;  (make-client-socket *server-ip* 10007))
